@@ -1,0 +1,39 @@
+# Gradle
+.gradle/
+build/
+gradle.properties
+*.jar
+*.zip
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+*.classpath
+*.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+.thumbs
+
+# Local files
+*.log
+*.swp
+*.swo
+*~
+
+# Models (optional - store large files separately)
+models/*.onnx
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+.env.local

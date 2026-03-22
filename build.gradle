@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.onnx.inference'
+version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // ONNX Runtime with GPU (CUDA) support
+    implementation 'com.microsoft.onnxruntime:onnxruntime:1.18.0'
+    
+    // Logging
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+    implementation 'ch.qos.logback:logback-classic:1.4.11'
+    
+    // Image processing (optional, for sample inference)
+    implementation 'org.opencv:opencv-java:4.8.1'
+    
+    // Testing
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
+}
+
+application {
+    mainClass = 'com.onnx.inference.OnnxModelTester'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Custom task to run with GPU
+tasks.register('runWithGpu', JavaExec) {
+    mainClass = application.mainClass
+    classpath = sourceSets.main.runtimeClasspath
+    
+    // JVM arguments for optimal GPU performance
+    jvmArgs = [
+        '-XX:+UseG1GC',
+        '-XX:MaxGCPauseMillis=200',
+        '-Xms1g',
+        '-Xmx4g'
+    ]
+}
