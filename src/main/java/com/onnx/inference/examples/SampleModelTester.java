@@ -103,19 +103,27 @@ public class SampleModelTester {
      */
     private static void printResults(OrtSession.Result results) throws OrtException {
         System.out.println("\n--- Inference Results ---");
-        for (int i = 0; i < results.getOutputCount(); i++) {
-            String outputName = results.getOutputNames().get(i);
-            Object output = results.get(i).getValue();
+        for (Map.Entry<String, OnnxValue> entry : results) {
+            String outputName = entry.getKey();
+            Object output = entry.getValue().getValue();
             
             System.out.println("Output '" + outputName + "':");
             if (output instanceof float[][][]) {
                 float[][][] data = (float[][][]) output;
                 System.out.println("  Shape: [" + data.length + "][" + data[0].length + "][" + data[0][0].length + "]");
-                System.out.println("  Sample values: " + Arrays.toString(Arrays.copyOfRange(data[0][0], 0, Math.min(5, data[0][0].length))));
+                if (data.length > 0 && data[0].length > 0 && data[0][0].length > 0) {
+                    System.out.println("  Sample values: " + Arrays.toString(Arrays.copyOfRange(data[0][0], 0, Math.min(5, data[0][0].length))));
+                }
             } else if (output instanceof float[]) {
                 float[] data = (float[]) output;
                 System.out.println("  Shape: [" + data.length + "]");
                 System.out.println("  Sample values: " + Arrays.toString(Arrays.copyOfRange(data, 0, Math.min(5, data.length))));
+            } else if (output instanceof long[]) {
+                long[] data = (long[]) output;
+                System.out.println("  Shape: [" + data.length + "] (int64)");
+                System.out.println("  Sample values: " + Arrays.toString(Arrays.copyOfRange(data, 0, Math.min(5, data.length))));
+            } else {
+                System.out.println("  Type: " + output.getClass().getSimpleName());
             }
         }
     }

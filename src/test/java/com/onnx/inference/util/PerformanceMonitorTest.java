@@ -33,7 +33,6 @@ public class PerformanceMonitorTest {
         
         monitor.start();
         monitor.end();
-        double firstAvg = monitor.getAverageMs();
         
         monitor.reset();
         // After reset, average should be 0

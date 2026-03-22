@@ -1,9 +1,6 @@
 package com.onnx.inference.util;
 
 import ai.onnxruntime.*;
-import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 public class OnnxModelLoader {
@@ -21,24 +18,13 @@ public class OnnxModelLoader {
      * Load ONNX model with CUDA GPU support
      */
     public void loadModel() throws OrtException {
-        SessionOptions opts = new SessionOptions();
-        
-        // Enable CUDA execution provider for GPU acceleration
-        opts.addCudaExecutionProvider();
-        
-        // Fallback to CPU if CUDA not available
-        opts.addCpuExecutionProvider();
-        
-        // Set optimization level
-        opts.setExecutionMode(ExecutionMode.SEQUENTIAL);
-        
-        // Configure graph optimization
-        opts.setOptimizationLevel(GraphOptimizationLevel.ALL_OPTIMIZED);
-        
-        System.out.println("Loading model from: " + modelPath);
-        this.session = env.createSession(modelPath, opts);
-        
-        printModelInfo();
+        try (OrtSession.SessionOptions opts = new OrtSession.SessionOptions()) {
+            
+            System.out.println("Loading model from: " + modelPath);
+            this.session = env.createSession(modelPath, opts);
+            
+            printModelInfo();
+        }
     }
     
     /**
@@ -46,14 +32,14 @@ public class OnnxModelLoader {
      */
     private void printModelInfo() throws OrtException {
         System.out.println("\n--- Model Information ---");
-        System.out.println("Input nodes:");
-        for (NodeArg input : session.getInputInfo().values()) {
-            System.out.println("  - " + input.getName() + ": " + Arrays.toString(input.getShape()));
+        System.out.println("Input node count: " + session.getInputInfo().size());
+        for (String inputName : session.getInputInfo().keySet()) {
+            System.out.println("  - Input: " + inputName);
         }
         
-        System.out.println("Output nodes:");
-        for (NodeArg output : session.getOutputInfo().values()) {
-            System.out.println("  - " + output.getName() + ": " + Arrays.toString(output.getShape()));
+        System.out.println("Output node count: " + session.getOutputInfo().size());
+        for (String outputName : session.getOutputInfo().keySet()) {
+            System.out.println("  - Output: " + outputName);
         }
     }
     
@@ -65,15 +51,17 @@ public class OnnxModelLoader {
             throw new OrtException("Model not loaded. Call loadModel() first.");
         }
         
-        List<String> outputNames = new ArrayList<>(session.getOutputInfo().keySet());
-        return session.run(inputs, outputNames);
+        return session.run(inputs);
     }
     
     /**
      * Create input tensor from float array
      */
     public OnnxTensor createFloatTensor(float[] data, long[] shape) throws OrtException {
-        return OnnxTensor.createTensor(env, data, shape);
+        // Create a 2D array wrapper to match the API
+        float[][] wrappedData = new float[1][0];
+        wrappedData[0] = data;
+        return OnnxTensor.createTensor(env, wrappedData);
     }
     
     /**

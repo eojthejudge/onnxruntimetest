@@ -9,7 +9,6 @@ public class OnnxModelTester {
         
         // Example model testing
         try {
-            OnnxModelTester tester = new OnnxModelTester();
             System.out.println("\nReady to test ONNX models with GPU acceleration.");
             System.out.println("Usage: Place your .onnx model files in the 'models' directory.");
             System.out.println("Then update this class to load and test your specific model.");
@@ -35,7 +34,6 @@ public class OnnxModelTester {
     }
     
     private static void checkCudaAvailability() {
-        String osName = System.getProperty("os.name").toLowerCase();
         String javaLibraryPath = System.getProperty("java.library.path");
         
         System.out.println("Java library path: " + javaLibraryPath);

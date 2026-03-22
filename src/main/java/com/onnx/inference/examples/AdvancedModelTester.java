@@ -93,8 +93,10 @@ public class AdvancedModelTester {
             
             // Create input tensors
             OrtEnvironment env = OrtEnvironment.getEnvironment();
-            OnnxTensor idTensor = OnnxTensor.createTensor(env, inputIds, new long[]{1, inputIds.length});
-            OnnxTensor maskTensor = OnnxTensor.createTensor(env, attentionMask, new long[]{1, attentionMask.length});
+            long[][] idArray = new long[][] {inputIds};
+            long[][] maskArray = new long[][] {attentionMask};
+            OnnxTensor idTensor = OnnxTensor.createTensor(env, idArray);
+            OnnxTensor maskTensor = OnnxTensor.createTensor(env, maskArray);
             
             Map<String, OnnxTensor> inputs = new HashMap<>();
             inputs.put("input_ids", idTensor);
@@ -134,9 +136,9 @@ public class AdvancedModelTester {
      */
     private static void printDetectionResults(OrtSession.Result results) throws OrtException {
         logger.info("Detection Results:");
-        for (int i = 0; i < results.getOutputCount(); i++) {
-            String outputName = results.getOutputNames().get(i);
-            Object output = results.get(i).getValue();
+        for (Map.Entry<String, OnnxValue> entry : results) {
+            String outputName = entry.getKey();
+            Object output = entry.getValue().getValue();
             
             if (output instanceof float[]) {
                 float[] data = (float[]) output;
@@ -152,13 +154,14 @@ public class AdvancedModelTester {
      */
     private static void printSegmentationResults(OrtSession.Result results) throws OrtException {
         logger.info("Segmentation Results:");
-        for (int i = 0; i < results.getOutputCount(); i++) {
-            String outputName = results.getOutputNames().get(i);
-            Object output = results.get(i).getValue();
+        for (Map.Entry<String, OnnxValue> entry : results) {
+            String outputName = entry.getKey();
+            Object output = entry.getValue().getValue();
             
             if (output instanceof long[]) {
                 long[] masks = (long[]) output;
-                logger.info("  {} - output classes: {}", outputName, Arrays.toString(masks));
+                logger.info("  {} - classes: {}", outputName, 
+                    Arrays.toString(Arrays.copyOfRange(masks, 0, Math.min(10, masks.length))));
             }
         }
     }
@@ -168,13 +171,13 @@ public class AdvancedModelTester {
      */
     private static void printNLPResults(OrtSession.Result results) throws OrtException {
         logger.info("NLP Results:");
-        for (int i = 0; i < results.getOutputCount(); i++) {
-            String outputName = results.getOutputNames().get(i);
-            Object output = results.get(i).getValue();
+        for (Map.Entry<String, OnnxValue> entry : results) {
+            String outputName = entry.getKey();
+            Object output = entry.getValue().getValue();
             
             if (output instanceof float[][]) {
                 float[][] logits = (float[][]) output;
-                logger.info("  {} - shape: [{}][{}]", outputName, logits.length, logits[0].length);
+                logger.info("  {} - shape: [{}][{}]", outputName, logits.length, logits.length > 0 ? logits[0].length : 0);
             }
         }
     }

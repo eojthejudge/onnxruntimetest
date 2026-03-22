@@ -23,8 +23,9 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation 'ch.qos.logback:logback-classic:1.4.11'
     
-    // Image processing (optional, for sample inference)
-    implementation 'org.opencv:opencv-java:4.8.1'
+    // Image processing (optional - uncomment if needed)
+    // Note: opencv-java requires manual setup or building from source
+    // Alternatives: use ImageIO for basic image loading, or add other image libraries
     
     // Testing
     testImplementation 'junit:junit:4.13.2'
