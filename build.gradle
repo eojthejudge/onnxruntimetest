@@ -17,7 +17,9 @@ repositories {
 
 dependencies {
     // ONNX Runtime with GPU (CUDA) support
-    implementation 'com.microsoft.onnxruntime:onnxruntime:1.18.0'
+    // 1.20.0+ has better CUDA 13.2 compatibility
+    // For CPU-only, use: implementation 'com.microsoft.onnxruntime:onnxruntime:1.20.0'
+    implementation 'com.microsoft.onnxruntime:onnxruntime_gpu:1.24.3'
     
     // Logging
     implementation 'org.slf4j:slf4j-api:2.0.9'
@@ -46,11 +48,31 @@ tasks.register('runWithGpu', JavaExec) {
     mainClass = application.mainClass
     classpath = sourceSets.main.runtimeClasspath
     
-    // JVM arguments for optimal GPU performance
+    // JVM arguments for optimal GPU performance with CUDA 13.2 and cuDNN v9.20
     jvmArgs = [
         '-XX:+UseG1GC',
         '-XX:MaxGCPauseMillis=200',
         '-Xms1g',
-        '-Xmx4g'
+        '-Xmx4g',
+        '-Djava.library.path=C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.2\\bin;C:\\Program Files\\NVIDIA\\CUDNN\\v9.20\\bin'
     ]
+}
+
+// Example: Run MNIST model tester
+tasks.register('runMnist', JavaExec) {
+    mainClass = 'com.onnx.inference.examples.MnistTester'
+    classpath = sourceSets.main.runtimeClasspath
+    
+    // JVM arguments for GPU support with CUDA 13.2 and cuDNN v9.20
+    jvmArgs = [
+        '-XX:+UseG1GC',
+        '-XX:MaxGCPauseMillis=200',
+        '-Xms1g',
+        '-Xmx4g',
+        '-Djava.library.path=C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.2\\bin;C:\\Program Files\\NVIDIA\\CUDNN\\v9.20\\bin'
+    ]
+    
+    // Environment variables for GPU support
+    environment 'CUDA_HOME', 'C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.2'
+    environment 'PATH', 'C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v13.2\\bin;C:\\Program Files\\NVIDIA\\CUDNN\\v9.20\\bin;' + System.getenv('PATH')
 }

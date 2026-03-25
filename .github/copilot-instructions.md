@@ -89,11 +89,12 @@ Most usage follows this lifecycle:
 - **NLP/BERT**: `[batch_size, sequence_length]` (int64 token IDs)
 - **Segmentation**: `[batch_size, 3, height, width]` → `[batch_size, num_classes, height, width]`
 
-### GPU/CUDA Considerations
-- The infrastructure supports GPU acceleration but CUDA provider is not explicitly configured in current `OnnxModelLoader`
-- For GPU support: Create `SessionOptions`, add CUDA provider, then pass to `env.createSession()`
-- Always have fallback to CPU - ONNX Runtime handles this automatically if GPU unavailable
-- Check `nvidia-smi` before running GPU tests
+### GPU/CUDA Support
+- `OnnxModelLoader` now attempts to enable GPU (CUDA) execution provider on model load
+- Falls back gracefully to CPU if GPU unavailable
+- Logs which execution provider is being used (check console output on model load)
+- To enable GPU: Install GPU-enabled ONNX Runtime package + NVIDIA CUDA 11.8+ + cuDNN 8.5+
+- Without GPU, inference still works on CPU (slower but functional)
 
 ### Dependencies
 - ONNX Runtime: 1.18.0 (with CPU+GPU support)
